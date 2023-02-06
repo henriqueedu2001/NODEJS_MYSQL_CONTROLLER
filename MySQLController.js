@@ -17,7 +17,7 @@ class Connection {
         this.con = mysql.createConnection({
             host: host,
             user: user,
-            password: password
+            password: password,
         });
     }
 
@@ -191,9 +191,10 @@ class ColumnDefinitions {
 class Table {
     /**
      * Generates an Table object, with name, title, description and content.
-     * @param {string} name 
-     * @param {string} title 
-     * @param {string} description 
+     * @param {string} name name of the table.
+     * @param {string} title title of the table, with spaces and special characters allowed.
+     * @param {string} description descripton of the table.
+     * @param {ColumnDefinitions} columnsDefinitions columns SQL definitions.
      */
     constructor (name, title, description, columnsDefinitions) {
         this.name = name;
@@ -211,13 +212,17 @@ class Table {
             "table: " + this.name + "\n" +
             "title: " + this.title + "\n" +
             "description: " + this.description + "\n" + 
-            "columns definitions:\n" + this.columnsDefinitions;
+            "columns definitions:\n" + this.columnsDefinitions.getString();
 
         return info_string;
     }
 
-    createTable(){
-
+    createTable(connection, database){
+        let sqlQuery = "CREATE TABLE IF NOT EXISTS " + database.name + "." + this.name + " (" + this.columnsDefinitions.getString() + ")";
+        connection.con.query(sqlQuery, function(error, result) {
+            if (error) throw error;
+        });
+        console.log(sqlQuery);
     }
 }
 
