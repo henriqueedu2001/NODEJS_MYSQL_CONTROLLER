@@ -102,6 +102,11 @@ class Database {
         this.description = description; 
         this.tables = tables;
     }
+
+    /**
+     * basic information of the database.
+     * @returns {string} string with the atributes: name, title, description and tables names.
+     */
     basicInfo(){
         let info_string = 
             "database: " + this.name + "\n" +
@@ -112,6 +117,70 @@ class Database {
             info_string += "    —" + this.tables[i].name + "\n";
         }
         return info_string;
+    }
+
+    /**
+     * Creates the database in the mysql database system.
+     * @param {Connection} connection 
+     */
+    createDatabase(connection) {
+        var sqlQuery = "CREATE DATABASE " + this.name;
+        connection.con.query(sqlQuery, function(error, result) {
+            if(error) throw error;
+            console.log("Sucess!");
+        });
+    }
+}
+
+/**
+ * Defines a sigle SQL column.
+ */
+class ColumnDefinition {
+    /**
+     * Generates a SQL column definition with the column name, type and modifiers.
+     * @param {string} name name of the column.
+     * @param {string} type SQL types (VARCHAR, INT, FLOAT etc.).
+     * @param {string} modifiers SQL modifiers, like UNIQUE or NOT NULL.
+     */
+    constructor (name, type, modifiers) {
+        this.name = name;
+        this.type = type;
+        this.modifiers = modifiers;
+    }
+
+    /**
+     * Generates the SQL string that defines the column"
+     * @returns {string} the SQL string in the format "name + type + modifiers.
+     */
+    getString() {
+        return this.name + " " + this.type + " " + this.modifiers;
+    }
+}
+
+/**
+ * Defines an set of SQL columns.
+ */
+class ColumnDefinitions {
+    /**
+     * Generates a SQL columns definition, all with the column names, types and modifiers.
+     * @param {ColumnDefinition[]} columnDefinitions 
+     */
+    constructor (columnDefinitions){
+        this.columnDefinitions = columnDefinitions;
+    }
+
+    /**
+     * Generates the SQL string that defines the column "
+     * @returns {string} The SQL string in the format "column1, column2, ..., columnN
+     */
+    getString() {
+        var finalString = "";
+        for(let i = 0; i < this.columnDefinitions.length - 1; i++){
+            finalString += this.columnDefinitions[i].getString() + ",\n";
+        }
+        finalString += this.columnDefinitions[this.columnDefinitions.length - 1].getString();
+        
+        return finalString;
     }
 }
 
@@ -126,11 +195,29 @@ class Table {
      * @param {string} title 
      * @param {string} description 
      */
-    constructor (name, title, description, content) {
+    constructor (name, title, description, columnsDefinitions) {
         this.name = name;
         this.title = title;
         this.description = description;
-        this.content = content;
+        this.columnsDefinitions = columnsDefinitions;
+    }
+
+    /**
+     * basic information of the table.
+     * @returns {string} string with the atributes: name, title, description and columns definitions.
+     */
+    basicInfo(){
+        let info_string = 
+            "table: " + this.name + "\n" +
+            "title: " + this.title + "\n" +
+            "description: " + this.description + "\n" + 
+            "columns definitions:\n" + this.columnsDefinitions;
+
+        return info_string;
+    }
+
+    createTable(){
+
     }
 }
 
@@ -138,5 +225,7 @@ module.exports = {
     Connection,
     DatabaseGroup,
     Database, 
-    Table
+    Table,
+    ColumnDefinition,
+    ColumnDefinitions
 }
